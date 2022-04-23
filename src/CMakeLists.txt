@@ -1,8 +1,7 @@
-add_executable(test
-        TestRunner.cpp
-)
+set(DOCTEST_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/deps/doctest/doctest)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_include_directories(test
-        PRIVATE
-        ../deps/doctest/doctest
-)
+add_subdirectory(gui)
+
+add_subdirectory(app)
+
