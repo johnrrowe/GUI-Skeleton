@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <object class="GtkWindow" id="main_window">
+  <object class="GtkWindow" id="window_main">
     <property name="width-request">900</property>
     <property name="height-request">600</property>
     <property name="can-focus">False</property>
@@ -15,12 +15,12 @@
           <object class="GtkToolbar">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="hexpand">False</property>
+            <property name="halign">end</property>
             <child>
-              <object class="GtkToolButton">
+              <object class="GtkToolButton" id="toolbutton_start_new">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_4</property>
+                <property name="label" translatable="yes">start new</property>
                 <property name="use-underline">True</property>
               </object>
               <packing>
@@ -29,10 +29,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton">
+              <object class="GtkToolButton" id="toolbutton_kill_selected">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_8</property>
+                <property name="label" translatable="yes">kill selected</property>
                 <property name="use-underline">True</property>
               </object>
               <packing>
@@ -44,17 +44,72 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="pack-type">end</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkListBox" id="list_box">
+          <object class="GtkListBox" id="listbox_processes">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="selection-mode">multiple</property>
+            <property name="activate-on-single-click">False</property>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
           <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
             <property name="position">1</property>
           </packing>
         </child>
