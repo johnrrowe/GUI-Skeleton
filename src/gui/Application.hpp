@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Widgets.hpp"
+#include "common/TSQueue.hpp"
+
 #include <memory>
 #include <string>
 #include <variant>
@@ -25,7 +28,10 @@ namespace GUI
     {
     public:
 
-        static std::variant<GUI::Application, InitError> initialize(const std::string& glade_file_path);
+        static std::variant<GUI::Application, InitError> initialize(
+            const std::string& glade_file_path,
+            ThreadSafe::Queue<GUI::Event>& gui_events
+        );
 
         Application(Gtk::Application* a, Gtk::Window* w);
 

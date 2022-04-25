@@ -7,7 +7,82 @@
 #include <gtkmm/window.h>
 
 
-std::variant<GUI::Application, GUI::InitError> GUI::Application::initialize(const std::string& glade_file_path)
+template <typename WidgetT>
+bool connect_widget(
+    Gtk::Builder& builder, 
+    GUI::Widgets widget,
+    ThreadSafe::Queue<GUI::Event>& queue 
+);
+
+
+template <>
+bool connect_widget<Gtk::ToolButton>(
+    Gtk::Builder& builder, 
+    GUI::Widgets widget,
+    ThreadSafe::Queue<GUI::Event>& queue
+)
+{
+    Gtk::ToolButton* toolbutton = nullptr; 
+    builder.get_widget(GUI::widget_name(widget), toolbutton);
+
+    if (toolbutton == nullptr)
+        return false;
+
+    toolbutton->signal_clicked().connect(
+        [&queue, widget] ()
+        {
+            queue.send(GUI::ButtonClicked{ widget });
+        }
+    );
+
+    return true;
+}
+
+
+template <>
+bool connect_widget<Gtk::ListBox>(
+    Gtk::Builder& builder, 
+    GUI::Widgets widget,
+    ThreadSafe::Queue<GUI::Event>& queue
+)
+{
+    Gtk::ListBox* list_box = nullptr; 
+    builder.get_widget(GUI::widget_name(widget), list_box);
+
+    if (list_box == nullptr)
+        return false;
+
+    list_box->signal_row_selected().connect(
+        [&queue, widget] (Gtk::ListBoxRow* row)
+        {
+            if (row)
+                queue.send(GUI::RowSelected{ widget, row->get_index() });
+            else
+                queue.send(GUI::RowSelectionCleared{ widget });
+        }
+    );
+
+    return true;
+}
+
+
+template <>
+bool connect_widget<Gtk::Window>(
+    Gtk::Builder& builder, 
+    GUI::Widgets widget,
+    ThreadSafe::Queue<GUI::Event>&
+)
+{
+    Gtk::Window* window = nullptr; 
+    builder.get_widget(GUI::widget_name(widget), window);
+    return window != nullptr;
+}
+
+
+std::variant<GUI::Application, GUI::InitError> GUI::Application::initialize(
+    const std::string& glade_file_path,
+    ThreadSafe::Queue<GUI::Event>& gui_events
+)
 {
     auto app = Gtk::Application::create();
 
@@ -36,34 +111,15 @@ std::variant<GUI::Application, GUI::InitError> GUI::Application::initialize(cons
         return InitError{ "Could not retrieve the widget: " + main_window_name };
     }
 
-    Gtk::ToolButton* kill_button = nullptr; 
-    const std::string kill_button_name = "toolbutton_kill_selected";
-    builder->get_widget(kill_button_name, kill_button);
+    bool connected_all_widgets = true
+        && connect_widget<Gtk::ToolButton>(*builder.get(), Widgets::KILL_SELECTED, gui_events)
+        && connect_widget<Gtk::ToolButton>(*builder.get(), Widgets::START_NEW_PROCESS, gui_events)
+        && connect_widget<Gtk::ListBox>(*builder.get(), Widgets::PROCESS_LIST, gui_events);
 
-    if (!kill_button)
+    if (!connected_all_widgets)
     {
-        return InitError{ "Could not retrieve the widget: " + kill_button_name };
+        return InitError{ "Could not retrieve all widgets" };
     }
-
-
-    Gtk::ListBox* process_list = nullptr; 
-    const std::string process_list_name = "listbox_processes";
-    builder->get_widget(process_list_name, process_list);
-
-    if (!process_list)
-    {
-        return InitError{ "Could not retrieve the widget: " + process_list_name };
-    }
-
-    process_list->signal_row_selected().connect(
-        [kill_button] (Gtk::ListBoxRow* row)
-        {
-            if (row == nullptr)
-                kill_button->set_sensitive(false);
-            else
-                kill_button->set_sensitive(true);
-        }
-    );
 
     return std::variant<Application, InitError>{ std::in_place_type<Application>, app.release(), main_window };
 }
