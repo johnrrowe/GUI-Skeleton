@@ -41,7 +41,6 @@ target_compile_options(app
     -Wcast-qual 
     -Wdisabled-optimization 
     -Wlogical-op 
-    -Wmissing-declarations 
     -Wmissing-include-dirs 
     -Woverloaded-virtual 
     -Wstrict-null-sentinel 

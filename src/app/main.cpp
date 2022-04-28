@@ -3,12 +3,12 @@
 #include <thread>
 
 
-struct EventHandler
+struct GuiEventHandler // inherit from boost::static_visitor<bool> if using boost::variant 
 {
     bool operator()(const GUI::ButtonClicked& button_clicked)
     {
         printf("BUTTON CLICKED %s\n", GUI::widget_name(button_clicked.widget).c_str());
-        return true;
+        return false;
     }
 
     bool operator()(const GUI::RowSelected& selected_row)
@@ -22,29 +22,36 @@ struct EventHandler
         printf("ROW SELECTION CLEARED %s\n", GUI::widget_name(list_box.widget).c_str());
         return false;
     }
+
+    bool operator()(const GUI::WindowClosed& window_closed)
+    {
+        printf("MAIN WINDOW CLOSED\n");
+        return window_closed.widget == GUI::Widgets::MAIN_WINDOW;
+    }
 };
 
 
-void handle_gui_events(ThreadSafe::Queue<GUI::Event>& gui_events);
 void handle_gui_events(ThreadSafe::Queue<GUI::Event>& gui_events)
 {
-    bool button_was_clicked = false;
+    bool main_window_closed = false;
 
-    while (!button_was_clicked)
+    while (!main_window_closed)
     {
         if (const auto event = gui_events.receive())
         {
-            button_was_clicked = std::visit(EventHandler{}, *event);
+            // use boost::apply_visitor if using boost::variant
+            main_window_closed = std::visit(GuiEventHandler{}, *event);
         }
     }
 }
 
 
-int main(int, char**)
+int main()
 {
     ThreadSafe::Queue<GUI::Event> gui_events;
 
-    std::jthread event_handler {
+    std::jthread event_handler // joins on destruction
+    {
         [&gui_events] ()
         {
             handle_gui_events(gui_events);        
@@ -53,15 +60,16 @@ int main(int, char**)
 
     const char* glade_file = "../../../resources/Main.glade";
 
-    auto gui_init_attempt = GUI::Application::initialize(glade_file, gui_events);
+    const auto gui_init_attempt = GUI::Application::initialize(glade_file, gui_events);
 
-    if (const auto* init_failure = std::get_if<GUI::InitError>(&gui_init_attempt)) 
+    if (const auto* init_failure = std::get_if<std::string>(&gui_init_attempt)) 
     {
-        printf("ERROR :: GUI :: %s\n", init_failure->reason.c_str());
+        printf("ERROR :: GUI :: %s\n", init_failure->c_str());
         return -1;
     }
-
-    auto& gui = std::get<GUI::Application>(gui_init_attempt);
-
-    return gui.run();
+    else
+    {
+        const auto& gui = std::get<GUI::Application>(gui_init_attempt);
+        return gui.run();
+    }
 }

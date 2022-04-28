@@ -8,7 +8,8 @@ namespace GUI
 {
     enum class Widgets
     {
-        KILL_SELECTED,
+        MAIN_WINDOW,
+        KILL_SELECTED_PROCESS,
         PROCESS_LIST,
         START_NEW_PROCESS,
         NONE,
@@ -32,9 +33,15 @@ namespace GUI
         Widgets widget { Widgets::NONE };
     };
 
+    struct WindowClosed
+    {
+        Widgets widget { Widgets::NONE };
+    };
+
     using Event = std::variant<
         ButtonClicked, 
         RowSelected,
-        RowSelectionCleared
+        RowSelectionCleared,
+        WindowClosed
     >;
 }

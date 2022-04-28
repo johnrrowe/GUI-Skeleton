@@ -5,7 +5,10 @@ std::string GUI::widget_name(Widgets widget)
 {
     switch (widget)
     {
-    case Widgets::KILL_SELECTED:
+    case Widgets::MAIN_WINDOW:
+        return "window_main";
+
+    case Widgets::KILL_SELECTED_PROCESS:
         return "toolbutton_kill_selected";
 
     case Widgets::PROCESS_LIST:
