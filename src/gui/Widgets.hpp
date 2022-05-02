@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <variant>
 
 
 namespace GUI
@@ -15,33 +14,7 @@ namespace GUI
         NONE,
     };
 
+    // Gets the name of specific widgets, and these names must match the names
+    // in the glade file.
     std::string widget_name(Widgets widget);
-
-    struct ButtonClicked
-    {
-        Widgets widget { Widgets::NONE };
-    };
-
-    struct RowSelected
-    {
-        Widgets widget { Widgets::NONE };
-        int index { 0 };
-    };
-
-    struct RowSelectionCleared 
-    {
-        Widgets widget { Widgets::NONE };
-    };
-
-    struct WindowClosed
-    {
-        Widgets widget { Widgets::NONE };
-    };
-
-    using Event = std::variant<
-        ButtonClicked, 
-        RowSelected,
-        RowSelectionCleared,
-        WindowClosed
-    >;
 }

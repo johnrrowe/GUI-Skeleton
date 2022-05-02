@@ -12,11 +12,11 @@ class Queue
 {
 public:
 
-    template <typename T>
-    void send(T&& message)
+    template <typename MessageT>
+    void send(MessageT&& message)
     {
         std::lock_guard<std::mutex> lock { queueMutex };
-        queue.push(std::forward<T>(message));
+        queue.push(std::forward<MessageT>(message));
     }
 
     std::optional<Message> receive()
@@ -43,6 +43,13 @@ public:
         queue.pop();
         return message;
     }
+
+    Queue() = default;
+
+    Queue(Queue&&) = delete;
+    Queue(const Queue&) = delete;
+    Queue& operator=(Queue&&) = delete;
+    Queue& operator=(const Queue&) = delete;
 
 private:
 

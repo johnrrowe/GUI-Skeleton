@@ -3,6 +3,8 @@ pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 
 add_library(gui
     Application.cpp
+    Controller.cpp
+    Dispatcher.cpp
     Widgets.cpp
 )
 
@@ -26,6 +28,11 @@ target_compile_options(gui
     PRIVATE 
     ${GTKMM_CFLAGS_OTHER}
     -std=c++17
-    -O2 
+    # -O2 
+    -ggdb
+)
+
+target_link_options(gui
+    PRIVATE
 )
 

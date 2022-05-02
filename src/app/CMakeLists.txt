@@ -1,16 +1,16 @@
-string(CONCAT APP_SOURCES
+set(APP_SOURCES
+    EventHandler.cpp
 )
 
 add_executable(app
-        main.cpp
-        ${APP_SOURCES}
+    main.cpp
+    ${APP_SOURCES}
 )
 
 
 target_include_directories(app
-        PRIVATE
-        ${DOCTEST_INCLUDE_DIRS}
-        ${SOURCE_DIR}
+    PRIVATE
+    ${SOURCE_DIR}
 )
 
 
@@ -28,8 +28,8 @@ target_compile_options(app
     -fcoroutines  
     -fconcepts 
     -fconcepts-diagnostics-depth=2 
-    # -fsanitize=address 
-    -O2 
+    # -O2 
+    -ggdb
 
     # WARNINGS
     -Wpedantic  
@@ -56,24 +56,9 @@ target_compile_options(app
 
 target_link_options(app
     PRIVATE
-    # -fsanitize=address 
 )
 
 
 target_compile_definitions(app 
     PRIVATE 
-    DOCTEST_CONFIG_DISABLE
 )
-
-
-add_executable(app_test
-        TestRunner.cpp
-        ${APP_SOURCES}
-)
-
-
-target_include_directories(app_test
-        PRIVATE
-        ${DOCTEST_INCLUDE_DIRS}
-)
-

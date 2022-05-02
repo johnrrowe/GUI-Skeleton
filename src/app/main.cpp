@@ -1,46 +1,24 @@
 #include "gui/Application.hpp"
 
+#include "EventHandler.hpp"
+
 #include <thread>
 
 
-struct GuiEventHandler // inherit from boost::static_visitor<bool> if using boost::variant 
+void run_event_handler(
+    ThreadSafe::Queue<GUI::Event>& gui_events,
+    GUI::Dispatcher<GUI::Update> dispatcher
+)
 {
-    bool operator()(const GUI::ButtonClicked& button_clicked)
+    EventHandler handler;
+
+    while (!handler.is_shutdown())
     {
-        printf("BUTTON CLICKED %s\n", GUI::widget_name(button_clicked.widget).c_str());
-        return false;
-    }
-
-    bool operator()(const GUI::RowSelected& selected_row)
-    {
-        printf("ROW SELECTED %s\n", GUI::widget_name(selected_row.widget).c_str());
-        return false;
-    }
-
-    bool operator()(const GUI::RowSelectionCleared& list_box)
-    {
-        printf("ROW SELECTION CLEARED %s\n", GUI::widget_name(list_box.widget).c_str());
-        return false;
-    }
-
-    bool operator()(const GUI::WindowClosed& window_closed)
-    {
-        printf("MAIN WINDOW CLOSED\n");
-        return window_closed.widget == GUI::Widgets::MAIN_WINDOW;
-    }
-};
-
-
-void handle_gui_events(ThreadSafe::Queue<GUI::Event>& gui_events)
-{
-    bool main_window_closed = false;
-
-    while (!main_window_closed)
-    {
-        if (const auto event = gui_events.receive())
+        while (const auto event = gui_events.receive())
         {
-            // use boost::apply_visitor if using boost::variant
-            main_window_closed = std::visit(GuiEventHandler{}, *event);
+            // you can use boost::apply_visitor if before C++17
+            if (auto update = std::visit(handler, *event))
+                dispatcher.send(std::move(*update));
         }
     }
 }
@@ -48,28 +26,15 @@ void handle_gui_events(ThreadSafe::Queue<GUI::Event>& gui_events)
 
 int main()
 {
-    ThreadSafe::Queue<GUI::Event> gui_events;
+    GUI::Application gui;
 
-    std::jthread event_handler // joins on destruction
+    std::jthread event_loop // joins on destruction
     {
-        [&gui_events] ()
+        [&gui] () 
         {
-            handle_gui_events(gui_events);        
+            run_event_handler(gui.event_queue(), gui.make_dispatcher());
         }
     };
 
-    const char* glade_file = "../../../resources/Main.glade";
-
-    const auto gui_init_attempt = GUI::Application::initialize(glade_file, gui_events);
-
-    if (const auto* init_failure = std::get_if<std::string>(&gui_init_attempt)) 
-    {
-        printf("ERROR :: GUI :: %s\n", init_failure->c_str());
-        return -1;
-    }
-    else
-    {
-        const auto& gui = std::get<GUI::Application>(gui_init_attempt);
-        return gui.run();
-    }
+    return gui.run();
 }
